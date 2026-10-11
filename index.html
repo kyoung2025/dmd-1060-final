@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dmd-1060-final</title>
+  </head>
+  <body>
+    <header>
+      <p>Princess Quest</p>
+    </header>
+    
+    <main>
+      <canvas id="gameCanvas"></canvas>
+      <div id="gameStartDiv" class="gameUI">
+        <h1>Princess Quest</h1>
+        <p>You have 30 seconds to catch the tomatos</p>
+        <p>Catch at least 10 to win</p>
+        <button id="gameStartBtn">Start</button>
+      </div>
+      <div id="gameEndDiv" class="gameUI">
+        <p>Game Over</p>
+        <h1>You <span id="gameWinLoseSpan"></span></h1>
+        <h1>Final Score: <span id="gameEndScoreSpan"></span></h1>
+        <p>Refresh the page to play again</p>
+      </div>
+    </main>
+
+    <footer>
+      <p>2026</p>
+    </footer>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
