@@ -7,6 +7,8 @@ const sizes = {
 }
 
 const speedDown = 300
+// Sidescroller
+const worldWidth = 2000;
 
 const gameStartDiv = document.querySelector("#gameStartDiv")
 const gameStartBtn = document.querySelector("#gameStartBtn")
@@ -32,7 +34,7 @@ class GameScene extends Phaser.Scene{
   }
 
   preload(){
-    this.load.image("bg", "assets/bg-blue.png");
+    this.load.image("bg", "assets/fall-bg.png");
     this.load.image("sunny", "assets/sunny.png");
     this.load.image("tomato", "/assets/tomato.png");
     this.load.image("particles", "/assets/particles.png");
@@ -47,9 +49,16 @@ class GameScene extends Phaser.Scene{
     this.bgMusic = this.sound.add("bgMusic")
     // this.bgMusic.play()
 
-    this.add.image(0, 0, "bg").setOrigin(0, 0).setScale(1.5);
+    // this.add.image(0, 0, "bg").setOrigin(0, 0).setScale(1.5);
+    this.background = this.add.tileSprite(
+      0, 0,
+      sizes.width,
+      sizes.height,
+      "bg"
+    ).setOrigin(0, 0).setScrollFactor(0);
+
     this.player = this.physics.add
-        .image(0, sizes.height - 200, "sunny" )
+        .image(0, sizes.height - 100, "sunny" )
         .setOrigin(0, 0)
         .setScale(0.5);
     // this.player.setImmovable(true);
@@ -61,6 +70,15 @@ class GameScene extends Phaser.Scene{
     this.player.setCollideWorldBounds(true);
     this.player.setSize(this.player.width-this.player.width/4, this.player.height/6).
     setOffset(this.player.width/10, this.player.height - this.player.height/10);
+
+    // -----------------  Sidescroller --------------
+    // Make the world wider than the screen
+    this.physics.world.setBounds(0, 0, worldWidth, sizes.height);
+    // Allow the player to move throughout the world
+    this.player.setCollideWorldBounds(true);
+    // Make the camera follow the player
+    this.cameras.main.setBounds(0, 0, worldWidth, sizes.height);
+    this.cameras.main.startFollow(this.player, true, 1, 1);
 
     this.target = this.physics.add
         .image(0, 0, "tomato")
@@ -76,10 +94,13 @@ class GameScene extends Phaser.Scene{
       font: "25px Arial",
       fill: "#fff",
     });
+    this.textScore.setScrollFactor(0);
+
     this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
       font: "25px Arial",
       fill: "#fff"
     });
+    this.textTime.setScrollFactor(0);
 
     this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
 
@@ -95,12 +116,21 @@ class GameScene extends Phaser.Scene{
   }
 
   update(){
+   
+    this.background.tilePositionX = this.cameras.main.scrollX;
+
     this.remainingTime = this.timedEvent.getRemainingSeconds()
     this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)
 
     if (this.target.y >= sizes.height) {
       this.target.setY(0);
-      this.target.setX(this.getRandomX());
+
+      this.target.setX(
+        Phaser.Math.Between(
+          this.cameras.main.scrollX,
+          this.cameras.main.scrollX + sizes.width - 50
+        )
+      );
     }
 
     const {left, right, up} = this.cursor;
@@ -121,7 +151,7 @@ class GameScene extends Phaser.Scene{
   }
 
   getRandomX(){
-    return Math.floor(Math.random() * 480);
+    return Phaser.Math.Between(0, worldWidth - 50);
   }
 
   targetHit(){
@@ -158,7 +188,7 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: {y: 1200},
-      debug: true
+      // debug: true
     }
   },
   scene: [GameScene]
