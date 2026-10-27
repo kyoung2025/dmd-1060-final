@@ -52,8 +52,12 @@ class GameScene extends Phaser.Scene{
         .image(0, sizes.height - 200, "sunny" )
         .setOrigin(0, 0)
         .setScale(0.5);
-    this.player.setImmovable(true);
-    this.player.body.allowGravity = false;
+    // this.player.setImmovable(true);
+    // this.player.body.allowGravity = false;
+    this.player.setImmovable(false);
+    this.player.body.allowGravity = true;
+    this.player.setGravityY(0);
+
     this.player.setCollideWorldBounds(true);
     this.player.setSize(this.player.width-this.player.width/4, this.player.height/6).
     setOffset(this.player.width/10, this.player.height - this.player.height/10);
@@ -99,14 +103,20 @@ class GameScene extends Phaser.Scene{
       this.target.setX(this.getRandomX());
     }
 
-    const {left, right} = this.cursor;
+    const {left, right, up} = this.cursor;
 
+    // Horizontal Movement
     if (left.isDown) {
       this.player.setVelocityX(-this.playerSpeed);
     } else if (right.isDown) {
       this.player.setVelocityX(this.playerSpeed);
     } else {
       this.player.setVelocityX(0);
+    }
+
+    // Vertical Movement
+    if (Phaser.Input.Keyboard.JustDown(up) && this.player.body.blocked.down) {
+      this.player.setVelocityY(-400);
     }
   }
 
@@ -147,7 +157,7 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: {y: speedDown},
+      gravity: {y: 1200},
       debug: true
     }
   },
