@@ -102,7 +102,7 @@ class GameScene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
+    this.timedEvent = this.time.delayedCall(15000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
