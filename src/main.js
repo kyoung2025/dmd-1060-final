@@ -2,8 +2,8 @@ import './style.css'
 import Phaser from 'phaser'
 
 const sizes = {
-  width: 500,
-  height: 500
+  width: 850,
+  height: 570
 }
 
 const speedDown = 300
@@ -21,7 +21,8 @@ class GameScene extends Phaser.Scene{
     super("scene-game");
     this.player;
     this.cursor;
-    this.playerSpeed = speedDown + 50;
+    // this.playerSpeed = speedDown + 50;
+    this.playerSpeed = 352;
     this.target;
     this.points = 0;
     this.textScore;
@@ -34,12 +35,15 @@ class GameScene extends Phaser.Scene{
   }
 
   preload(){
-    this.load.image("bg", "assets/fall-bg.png");
+    this.load.image("bg", "assets/sky-bg1.png");
     this.load.image("sunny", "assets/sunny.png");
     this.load.image("tomato", "/assets/tomato.png");
     this.load.image("particles", "/assets/particles.png");
     this.load.audio("pop", "/assets/pop.mp3");
     this.load.audio("bgMusic", "/assets/bgMusic.mp3");
+
+    this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
+    this.load.image('tileset-image', 'assets/grass-tiles5.png'); 
   }
 
   create(){
@@ -50,15 +54,75 @@ class GameScene extends Phaser.Scene{
     // this.bgMusic.play()
 
     // this.add.image(0, 0, "bg").setOrigin(0, 0).setScale(1.5);
-    this.background = this.add.tileSprite(
+    /*this.background = this.add.tileSprite(
       0, 0,
+      sizes.width,
+      sizes.height,
+      "bg"
+    ).setOrigin(0, 0).setScrollFactor(0);*/
+    
+    // TILED MAP
+    const map = this.make.tilemap({ key: 'map' });
+
+    // 3. Add the tileset image to the map (First param = name in Tiled, Second = preload key)
+    const tileset = map.addTilesetImage('grass-tiles5', 'tileset-image');
+
+    // 4. Create the layers
+    const grassLayer = map.createLayer('Tile Layer 1', tileset, 0, 0); // Your collision layer
+    grassLayer.setDepth(1);
+    grassLayer.setScale(3.5) ;
+
+    this.worldFloorY = map.heightInPixels * grassLayer.scaleY;
+
+    this.physics.world.setBounds(
+      0, 0,
+      map.widthInPixels * grassLayer.scaleX,
+      this.worldFloorY
+    );
+
+    this.cameras.main.setBounds(
+      0,
+      this.worldFloorY - sizes.height,
+      this.physics.world.bounds.width,
+      sizes.height
+    );
+
+    // 5. Enable collisions on the walls layer
+    // Option A: Exclude empty tiles (-1 means empty space)
+    grassLayer.setCollisionByExclusion([-1]);
+
+    // Option B: Or set collision by custom property if you added 'collides: true' in Tiled
+    // wallsLayer.setCollisionByProperty({ collides: true });
+    
+
+
+
+    // Get original background image dimensions
+    const bg = this.textures.get("bg").getSourceImage();
+
+    const scaleX = sizes.width / bg.width;
+    const scaleY = sizes.height / bg.height;
+
+    const scale = Math.max(scaleX, scaleY);
+
+    // Create background that fills the screen
+    this.background = this.add.tileSprite(
+      0,
+      0,
       sizes.width,
       sizes.height,
       "bg"
     ).setOrigin(0, 0).setScrollFactor(0);
 
+    // groundLayer.setDepth(1);
+
+    // Scale the actual texture
+    this.background.setTileScale(1 / scale, 1 / scale);
+
+    const groundY = this.worldFloorY;
+
     this.player = this.physics.add
-        .image(0, sizes.height - 100, "sunny" )
+        .image(100, groundY - 100, "sunny" )
         .setOrigin(0, 0)
         .setScale(0.5);
     // this.player.setImmovable(true);
@@ -68,17 +132,38 @@ class GameScene extends Phaser.Scene{
     this.player.setGravityY(0);
 
     this.player.setCollideWorldBounds(true);
-    this.player.setSize(this.player.width-this.player.width/4, this.player.height/6).
-    setOffset(this.player.width/10, this.player.height - this.player.height/10);
+    this.player.setSize(this.player.width-this.player.width/1.5, this.player.height/2).
+    setOffset(this.player.width/7, this.player.height - this.player.height/2);
+
+    this.cameras.main.scrollX = 0;
+    this.cameras.main.scrollY = groundY - sizes.height;
+
+
+    this.cameras.main.roundPixels = true;
+    this.cameras.main.startFollow(
+      this.player,
+      true,
+      1,
+      0
+    );
+
+    this.cameras.main.setFollowOffset(0, 0);
+
 
     // -----------------  Sidescroller --------------
-    // Make the world wider than the screen
-    this.physics.world.setBounds(0, 0, worldWidth, sizes.height);
-    // Allow the player to move throughout the world
+
+    // TILED MAP
+    // this.physics.world.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
+    // this.cameras.main.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
+    
+
+
     this.player.setCollideWorldBounds(true);
     // Make the camera follow the player
-    this.cameras.main.setBounds(0, 0, worldWidth, sizes.height);
-    this.cameras.main.startFollow(this.player, true, 1, 1);
+    // this.cameras.main.setBounds(0, 0, worldWidth, sizes.height);
+    // this.cameras.main.startFollow(this.player, true, 1, 1);
+
+
 
     this.target = this.physics.add
         .image(0, 0, "tomato")
@@ -89,6 +174,9 @@ class GameScene extends Phaser.Scene{
         this.physics.add.overlap(this.target, this.player, this.targetHit, null, this)
 
     this.cursor = this.input.keyboard.createCursorKeys();
+
+     // 7. Add a collider between the player and the walls layer
+    this.physics.add.collider(this.player, grassLayer);
 
     this.textScore = this.add.text(sizes.width - 120, 10, "Score:0", {
       font: "25px Arial",
@@ -102,7 +190,7 @@ class GameScene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(15000, this.gameOver, [], this)
+    this.timedEvent = this.time.delayedCall(10000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
@@ -116,13 +204,28 @@ class GameScene extends Phaser.Scene{
   }
 
   update(){
-   
-    this.background.tilePositionX = this.cameras.main.scrollX;
+    /*const camera = this.cameras.main;
 
+    const desiredScrollX = this.player.x - sizes.width / 2;
+
+    camera.scrollX = Math.round(
+      Phaser.Math.Clamp(
+        desiredScrollX,
+        0,
+        this.physics.world.bounds.width - sizes.width
+      )
+    );
+
+    camera.scrollY = Math.round(this.worldFloorY - sizes.height);*/
+
+    // Keep camera vertically fixed at starting position
+    this.cameras.main.scrollY = this.worldFloorY - sizes.height;
+
+    this.background.tilePositionX = this.cameras.main.scrollX;
     this.remainingTime = this.timedEvent.getRemainingSeconds()
     this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)
 
-    if (this.target.y >= sizes.height) {
+    if (this.target.y >= this.worldFloorY) {
       this.target.setY(0);
 
       this.target.setX(
@@ -146,7 +249,7 @@ class GameScene extends Phaser.Scene{
 
     // Vertical Movement
     if (Phaser.Input.Keyboard.JustDown(up) && this.player.body.blocked.down) {
-      this.player.setVelocityY(-400);
+      this.player.setVelocityY(-640);
     }
   }
 
@@ -183,6 +286,7 @@ const config = {
   width: sizes.width,
   height: sizes.height,
   pixelArt: true,
+  roundPixels: true,
   canvas: gameCanvas,
   physics: {
     default: "arcade",
