@@ -43,7 +43,7 @@ class GameScene extends Phaser.Scene{
     this.load.audio("bgMusic", "/assets/bgMusic.mp3");
 
     this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
-    this.load.image('tileset-image', 'assets/grass-tiles5.png'); 
+    this.load.image('tileset-image', 'assets/grass-tiles5.png');
   }
 
   create(){
@@ -52,14 +52,6 @@ class GameScene extends Phaser.Scene{
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
     // this.bgMusic.play()
-
-    // this.add.image(0, 0, "bg").setOrigin(0, 0).setScale(1.5);
-    /*this.background = this.add.tileSprite(
-      0, 0,
-      sizes.width,
-      sizes.height,
-      "bg"
-    ).setOrigin(0, 0).setScrollFactor(0);*/
     
     // TILED MAP
     const map = this.make.tilemap({ key: 'map' });
@@ -90,11 +82,6 @@ class GameScene extends Phaser.Scene{
     // 5. Enable collisions on the walls layer
     // Option A: Exclude empty tiles (-1 means empty space)
     grassLayer.setCollisionByExclusion([-1]);
-
-    // Option B: Or set collision by custom property if you added 'collides: true' in Tiled
-    // wallsLayer.setCollisionByProperty({ collides: true });
-    
-
 
 
     // Get original background image dimensions
@@ -137,7 +124,6 @@ class GameScene extends Phaser.Scene{
 
     this.cameras.main.scrollX = 0;
     this.cameras.main.scrollY = groundY - sizes.height;
-
 
     this.cameras.main.roundPixels = true;
     this.cameras.main.startFollow(
@@ -190,7 +176,7 @@ class GameScene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(10000, this.gameOver, [], this)
+    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
