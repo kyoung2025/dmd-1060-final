@@ -44,11 +44,14 @@ class GameScene extends Phaser.Scene{
 
     this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
     this.load.image('tileset-image', 'assets/grass-tiles5.png');
+    this.load.spritesheet("sheet", "/assets/sunny-walk.png", {
+      frameWidth: 16,
+      frameHeight: 32,
+    });
   }
 
   create(){
     this.scene.pause("scene-game")
-
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
     // this.bgMusic.play()
@@ -108,14 +111,35 @@ class GameScene extends Phaser.Scene{
 
     const groundY = this.worldFloorY;
 
+    // Animations
+    this.anims.create({
+      key: "walk",
+      frames: this.anims.generateFrameNumbers("sheet", {
+        start: 0,
+        end: 4
+      }),
+      frameRate: 6,
+      repeat: -1
+    });
+
+    // this.player = this.add.sprite(0, 0, "sheet");
     this.player = this.physics.add
+        .sprite(100, groundY - 100, "sheet" )
+        .setOrigin(0, 0)
+        .setScale(4);
+
+    // this.player.play("walk")
+    // Set idle animation
+    this.player.setFrame(4)
+    
+
+    /*this.player = this.physics.add
         .image(100, groundY - 100, "sunny" )
         .setOrigin(0, 0)
-        .setScale(0.5);
-    // this.player.setImmovable(true);
-    // this.player.body.allowGravity = false;
-    this.player.setImmovable(false);
-    this.player.body.allowGravity = true;
+        .setScale(0.5);*/
+  
+    // this.player.setImmovable(false);
+    // this.player.body.allowGravity = true;
     this.player.setGravityY(0);
 
     this.player.setCollideWorldBounds(true);
@@ -186,23 +210,11 @@ class GameScene extends Phaser.Scene{
       emitting: false,
     })
     this.emitter.startFollow(this.player, this.player.width/ 2, this.player.height / 2, true);
+
     
   }
 
   update(){
-    /*const camera = this.cameras.main;
-
-    const desiredScrollX = this.player.x - sizes.width / 2;
-
-    camera.scrollX = Math.round(
-      Phaser.Math.Clamp(
-        desiredScrollX,
-        0,
-        this.physics.world.bounds.width - sizes.width
-      )
-    );
-
-    camera.scrollY = Math.round(this.worldFloorY - sizes.height);*/
 
     // Keep camera vertically fixed at starting position
     this.cameras.main.scrollY = this.worldFloorY - sizes.height;
@@ -227,10 +239,24 @@ class GameScene extends Phaser.Scene{
     // Horizontal Movement
     if (left.isDown) {
       this.player.setVelocityX(-this.playerSpeed);
+
+      if(!this.player.anims.isPlaying){
+        this.player.play("walk")
+      }
+      this.player.setFlipX(true)
+      
     } else if (right.isDown) {
       this.player.setVelocityX(this.playerSpeed);
+
+      if(!this.player.anims.isPlaying){
+        this.player.play("walk")
+      }
+      this.player.setFlipX(false)
+
     } else {
       this.player.setVelocityX(0);
+      this.player.anims.stop();
+      this.player.setFrame(4);
     }
 
     // Vertical Movement
