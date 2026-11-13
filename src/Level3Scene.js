@@ -28,7 +28,6 @@ export default class Level3Scene extends Phaser.Scene{
     this.points = 0;
     this.textScore;
     this.textTime;
-    this.timedEvent;
     this.remainingTime;
     this.popMusic;
     this.bgMusic;
@@ -52,6 +51,8 @@ export default class Level3Scene extends Phaser.Scene{
   }
 
   create(){
+    this.isGameOver = false;
+    
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
     // this.bgMusic.play()
@@ -185,8 +186,6 @@ export default class Level3Scene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(3000000, this.gameOver, [], this)
-
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
       gravityY: speedDown - 200,
@@ -214,13 +213,31 @@ export default class Level3Scene extends Phaser.Scene{
   }
 
   update(){
+    // Global Timer
+    const gameStartTime = this.registry.get("gameStartTime");
+    const totalGameTime = this.registry.get("totalGameTime");
+
+    const elapsedTime = Date.now() - gameStartTime;
+
+    this.remainingTime = Math.max(
+        0,
+        (totalGameTime - elapsedTime) / 1000
+    );
+
+    this.textTime.setText(
+        `Remaining Time: ${Math.ceil(this.remainingTime)}`
+    );
+
+    if (this.remainingTime <= 0 && !this.isGameOver) {
+        this.isGameOver = true;
+        this.gameOver();
+        return;
+    }
 
     // Keep camera vertically fixed at starting position
     this.cameras.main.scrollY = this.worldFloorY - sizes.height;
 
     this.background.tilePositionX = this.cameras.main.scrollX;
-    this.remainingTime = this.timedEvent.getRemainingSeconds()
-    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)
 
     if (this.target.y >= this.worldFloorY) {
       this.target.setY(0);

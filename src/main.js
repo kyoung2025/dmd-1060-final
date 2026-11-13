@@ -18,6 +18,9 @@ const gameEndDiv = document.querySelector("#gameEndDiv")
 const gameWinLoseSpan = document.querySelector("#gameWinLoseSpan")
 const gameEndScoreSpan = document.querySelector("#gameEndScoreSpan")
 
+let gameStartTime = null;
+const totalGameTime = 300000
+
 class GameScene extends Phaser.Scene{
   constructor(){
     super("scene-game");
@@ -53,6 +56,8 @@ class GameScene extends Phaser.Scene{
   }
 
   create(){
+    this.isGameOver = false;
+
     this.scene.pause("scene-game")
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
@@ -181,7 +186,7 @@ class GameScene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
+    // this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
@@ -211,12 +216,36 @@ class GameScene extends Phaser.Scene{
 
   update(){
 
+    // Global Timer
+    const gameStartTime = this.registry.get("gameStartTime");
+    const totalGameTime = this.registry.get("totalGameTime");
+
+    const elapsedTime = Date.now() - gameStartTime;
+
+    this.remainingTime = Math.max(
+        0,
+        (totalGameTime - elapsedTime) / 1000
+    );
+
+    this.textTime.setText(
+        `Remaining Time: ${Math.ceil(this.remainingTime)}`
+    );
+
+    if (this.remainingTime <= 0 && !this.isGameOver) {
+      this.isGameOver = true;
+      this.gameOver();
+    }
+
     // Keep camera vertically fixed at starting position
     this.cameras.main.scrollY = this.worldFloorY - sizes.height;
 
     this.background.tilePositionX = this.cameras.main.scrollX;
-    this.remainingTime = this.timedEvent.getRemainingSeconds()
-    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)
+
+    /*this.remainingTime = this.timedEvent.getRemainingSeconds()
+    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)*/
+
+
+
 
     if (this.target.y >= this.worldFloorY) {
       this.target.setY(0);
@@ -310,5 +339,8 @@ const game = new Phaser.Game(config)
 
 gameStartBtn.addEventListener("click", ()=> {
   gameStartDiv.style.display = "none"
+
+  game.registry.set("gameStartTime", Date.now());
+  game.registry.set("totalGameTime", 300000);
   game.scene.resume("scene-game")
 })
