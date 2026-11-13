@@ -104,7 +104,7 @@ class GameScene extends Phaser.Scene{
       "bg"
     ).setOrigin(0, 0).setScrollFactor(0);
 
-    // groundLayer.setDepth(1);
+    // groundLayer.setDepth(1):
 
     // Scale the actual texture
     this.background.setTileScale(1 / scale, 1 / scale);
@@ -122,13 +122,11 @@ class GameScene extends Phaser.Scene{
       repeat: -1
     });
 
-    // this.player = this.add.sprite(0, 0, "sheet");
     this.player = this.physics.add
         .sprite(100, groundY - 100, "sheet" )
         .setOrigin(0, 0)
         .setScale(4);
 
-    // this.player.play("walk")
     // Set idle animation
     this.player.setFrame(4)
     
