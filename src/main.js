@@ -1,5 +1,6 @@
 import './style.css'
 import Phaser from 'phaser'
+import Level2Scene from './Level2Scene.js'
 
 const sizes = {
   width: 850,
@@ -130,14 +131,6 @@ class GameScene extends Phaser.Scene{
     // Set idle animation
     this.player.setFrame(4)
     
-
-    /*this.player = this.physics.add
-        .image(100, groundY - 100, "sunny" )
-        .setOrigin(0, 0)
-        .setScale(0.5);*/
-  
-    // this.player.setImmovable(false);
-    // this.player.body.allowGravity = true;
     this.player.setGravityY(0);
 
     this.player.setCollideWorldBounds(true);
@@ -160,18 +153,7 @@ class GameScene extends Phaser.Scene{
 
     // -----------------  Sidescroller --------------
 
-    // TILED MAP
-    // this.physics.world.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
-    // this.cameras.main.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
-    
-
-
     this.player.setCollideWorldBounds(true);
-    // Make the camera follow the player
-    // this.cameras.main.setBounds(0, 0, worldWidth, sizes.height);
-    // this.cameras.main.startFollow(this.player, true, 1, 1);
-
-
 
     this.target = this.physics.add
         .image(0, 0, "tomato")
@@ -209,6 +191,20 @@ class GameScene extends Phaser.Scene{
     })
     this.emitter.startFollow(this.player, this.player.width/ 2, this.player.height / 2, true);
 
+    // Create goal/portal to trigger level 2
+    const levelEndX = this.physics.world.bounds.width;
+
+    // 2. Place the goal near the right edge and above the ground floor
+    this.goal = this.physics.add.sprite(levelEndX - 100, this.worldFloorY - 100, 'tomato');
+    this.goal.setScale(0.5); // Optional: adjust size if the tomato image is huge
+    this.goal.body.setAllowGravity(false);
+    this.goal.body.setImmovable(true);
+
+    // 3. Detect when player touches the goal
+    this.physics.add.overlap(this.player, this.goal, () => {
+        console.log("Goal reached!");
+        this.scene.start('Level2Scene');
+    });
     
   }
 
@@ -291,6 +287,7 @@ class GameScene extends Phaser.Scene{
   }
 }
 
+
 const config = {
   type: Phaser.WEBGL,
   width: sizes.width,
@@ -305,7 +302,7 @@ const config = {
       // debug: true
     }
   },
-  scene: [GameScene]
+  scene: [GameScene, Level2Scene]
 }
 
 const game = new Phaser.Game(config)
