@@ -1,6 +1,7 @@
 import './style.css'
 import Phaser from 'phaser'
 import Level2Scene from './Level2Scene.js'
+import Level3Scene from './Level3Scene.js'
 
 const sizes = {
   width: 850,
@@ -302,7 +303,7 @@ const config = {
       // debug: true
     }
   },
-  scene: [GameScene, Level2Scene]
+  scene: [GameScene, Level2Scene, Level3Scene]
 }
 
 const game = new Phaser.Game(config)

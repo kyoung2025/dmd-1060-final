@@ -42,7 +42,7 @@ export default class Level2Scene extends Phaser.Scene{
     this.load.audio("pop", "/assets/pop.mp3");
     this.load.audio("bgMusic", "/assets/bgMusic.mp3");
 
-    this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
+    this.load.tilemapTiledJSON('map2', 'assets/level2.tmj');
     this.load.image('tileset-image', 'assets/grass-tiles5.png');
     this.load.spritesheet("sheet", "/assets/sunny-walk.png", {
       frameWidth: 16,
@@ -56,7 +56,7 @@ export default class Level2Scene extends Phaser.Scene{
     // this.bgMusic.play()
     
     // TILED MAP
-    const map = this.make.tilemap({ key: 'map' });
+    const map = this.make.tilemap({ key: 'map2' });
 
     // 3. Add the tileset image to the map (First param = name in Tiled, Second = preload key)
     const tileset = map.addTilesetImage('grass-tiles5', 'tileset-image');
@@ -184,7 +184,7 @@ export default class Level2Scene extends Phaser.Scene{
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
+    this.timedEvent = this.time.delayedCall(3000000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
@@ -207,7 +207,7 @@ export default class Level2Scene extends Phaser.Scene{
     // 3. Detect when player touches the goal
     this.physics.add.overlap(this.player, this.goal, () => {
         console.log("Goal reached!");
-        this.scene.start('Level2Scene');
+        this.scene.start('Level3Scene');
     });
     
   }
