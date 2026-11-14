@@ -26,7 +26,6 @@ class GameScene extends Phaser.Scene{
     super("scene-game");
     this.player;
     this.cursor;
-    // this.playerSpeed = speedDown + 50;
     this.playerSpeed = 352;
     this.target;
     this.points = 0;
@@ -130,7 +129,7 @@ class GameScene extends Phaser.Scene{
     });
 
     this.player = this.physics.add
-        .sprite(100, groundY - 100, "sheet" )
+        .sprite(100, groundY - 170, "sheet" )
         .setOrigin(0, 0)
         .setScale(4);
 
@@ -139,9 +138,11 @@ class GameScene extends Phaser.Scene{
     
     this.player.setGravityY(0);
 
-    this.player.setCollideWorldBounds(true);
+    // this.player.setCollideWorldBounds(true);
     this.player.setSize(this.player.width-this.player.width/1.5, this.player.height/2).
     setOffset(this.player.width/7, this.player.height - this.player.height/2);
+
+    // this.cameras.main.setViewport(0, 0, 850, 600);
 
     this.cameras.main.scrollX = 0;
     this.cameras.main.scrollY = groundY - sizes.height;
@@ -174,6 +175,12 @@ class GameScene extends Phaser.Scene{
      // 7. Add a collider between the player and the walls layer
     this.physics.add.collider(this.player, grassLayer);
 
+    this.textScore = this.add.text(sizes.width - 250, 10, "Level 1", {
+      font: "25px Arial",
+      fill: "#fff",
+    });
+    this.textScore.setScrollFactor(0);
+
     this.textScore = this.add.text(sizes.width - 120, 10, "Score:0", {
       font: "25px Arial",
       fill: "#fff",
@@ -202,14 +209,16 @@ class GameScene extends Phaser.Scene{
 
     // 2. Place the goal near the right edge and above the ground floor
     this.goal = this.physics.add.sprite(levelEndX - 100, this.worldFloorY - 100, 'tomato');
-    this.goal.setScale(0.5); // Optional: adjust size if the tomato image is huge
+    this.goal.setScale(0.5);
+    this.goal.setVisible(false);
     this.goal.body.setAllowGravity(false);
     this.goal.body.setImmovable(true);
 
     // 3. Detect when player touches the goal
     this.physics.add.overlap(this.player, this.goal, () => {
-        console.log("Goal reached!");
-        this.scene.start('Level2Scene');
+      if (this.isGameOver) return;
+
+      this.scene.start('Level2Scene');
     });
     
   }
@@ -217,24 +226,26 @@ class GameScene extends Phaser.Scene{
   update(){
 
     // Global Timer
-    const gameStartTime = this.registry.get("gameStartTime");
-    const totalGameTime = this.registry.get("totalGameTime");
+      if (this.isGameOver) return;
 
-    const elapsedTime = Date.now() - gameStartTime;
+      const gameStartTime = this.registry.get("gameStartTime");
+      const totalGameTime = this.registry.get("totalGameTime");
 
-    this.remainingTime = Math.max(
+      const elapsedTime = Date.now() - gameStartTime;
+
+      this.remainingTime = Math.max(
         0,
         (totalGameTime - elapsedTime) / 1000
-    );
+      );
 
-    this.textTime.setText(
+      this.textTime.setText(
         `Remaining Time: ${Math.ceil(this.remainingTime)}`
-    );
+      );
 
-    if (this.remainingTime <= 0 && !this.isGameOver) {
-      this.isGameOver = true;
-      this.gameOver();
-    }
+      if (this.remainingTime <= 0) {
+        this.gameOver();
+        return;
+      }
 
     // Keep camera vertically fixed at starting position
     this.cameras.main.scrollY = this.worldFloorY - sizes.height;
@@ -303,16 +314,25 @@ class GameScene extends Phaser.Scene{
   }
 
   gameOver(){
-    this.sys.game.destroy(true)
-    if(this.points >= 10){
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Win!"
+     if (this.isGameOver) return;
+
+    this.isGameOver = true;
+
+    // Stop gameplay without destroying Phaser
+    this.physics.pause();
+
+    this.player.setVelocity(0, 0);
+    this.player.anims.stop();
+
+    gameEndScoreSpan.textContent = this.points;
+
+    if (this.points >= 10) {
+      gameWinLoseSpan.textContent = "Win!";
     } else {
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Lose"
+      gameWinLoseSpan.textContent = "Lose";
     }
 
-    gameEndDiv.style.display = "flex"
+    gameEndDiv.style.display = "flex";
 
   }
 }

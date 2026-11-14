@@ -52,7 +52,7 @@ export default class Level3Scene extends Phaser.Scene{
 
   create(){
     this.isGameOver = false;
-    
+
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
     // this.bgMusic.play()
@@ -124,7 +124,7 @@ export default class Level3Scene extends Phaser.Scene{
     });
 
     this.player = this.physics.add
-        .sprite(100, groundY - 100, "sheet" )
+        .sprite(100, groundY - 170, "sheet" )
         .setOrigin(0, 0)
         .setScale(4);
 
@@ -168,7 +168,7 @@ export default class Level3Scene extends Phaser.Scene{
      // 7. Add a collider between the player and the walls layer
     this.physics.add.collider(this.player, grassLayer);
 
-    this.textScore = this.add.text(sizes.width - 500, 10, "Level 3", {
+    this.textScore = this.add.text(sizes.width - 250, 10, "Level 3", {
       font: "25px Arial",
       fill: "#fff",
     });
@@ -200,16 +200,19 @@ export default class Level3Scene extends Phaser.Scene{
 
     // 2. Place the goal near the right edge and above the ground floor
     this.goal = this.physics.add.sprite(levelEndX - 100, this.worldFloorY - 100, 'tomato');
-    this.goal.setScale(0.5); // Optional: adjust size if the tomato image is huge
+    this.goal.setScale(0.5); 
+    this.goal.setVisible(false);
     this.goal.body.setAllowGravity(false);
     this.goal.body.setImmovable(true);
 
     // 3. Detect when player touches the goal
-    this.physics.add.overlap(this.player, this.goal, () => {
-        console.log("Goal reached!");
-        this.scene.start('Level2Scene');
-    });
-    
+    this.physics.add.overlap(
+      this.player,
+      this.goal,
+      this.levelComplete,
+      null,
+      this
+    );
   }
 
   update(){
@@ -295,17 +298,47 @@ export default class Level3Scene extends Phaser.Scene{
   }
 
   gameOver(){
-    this.sys.game.destroy(true)
-    if(this.points >= 10){
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Win!"
+    if (this.isGameOver) return;
+
+    this.isGameOver = true;
+
+    this.physics.pause();
+
+    gameEndScoreSpan.textContent = this.points;
+
+    if (this.points >= 10) {
+        gameWinLoseSpan.textContent = "Win!";
     } else {
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Lose"
+        gameWinLoseSpan.textContent = "Lose";
     }
 
-    gameEndDiv.style.display = "flex"
+    gameEndDiv.style.display = "flex";
 
+  }
+
+  // Display end screen when reach end of level 3
+  levelComplete() {
+    if (this.isGameOver) return;
+
+    this.isGameOver = true;
+
+    // Stop player movement
+    this.player.setVelocity(0, 0);
+    this.player.anims.stop();
+
+    // Stop the timer and gameplay
+    this.physics.pause();
+
+    // Display game-over screen
+    gameEndScoreSpan.textContent = this.points;
+
+    if (this.points >= 10) {
+        gameWinLoseSpan.textContent = "Win!";
+    } else {
+        gameWinLoseSpan.textContent = "Lose";
+    }
+
+    gameEndDiv.style.display = "flex";
   }
 }
 
