@@ -28,7 +28,6 @@ class GameScene extends Phaser.Scene{
     this.cursor;
     this.playerSpeed = 352;
     this.target;
-    this.points = 0;
     this.textScore;
     this.textTime;
     this.timedEvent;
@@ -55,6 +54,7 @@ class GameScene extends Phaser.Scene{
   }
 
   create(){
+
     this.isGameOver = false;
 
     this.scene.pause("scene-game")
@@ -181,10 +181,15 @@ class GameScene extends Phaser.Scene{
     });
     this.textScore.setScrollFactor(0);
 
-    this.textScore = this.add.text(sizes.width - 120, 10, "Score:0", {
-      font: "25px Arial",
-      fill: "#fff",
-    });
+    this.textScore = this.add.text(
+      sizes.width - 120,
+      10,
+      `Score: ${this.points}`,
+      {
+        font: "25px Arial",
+        fill: "#fff",
+      }
+    );
     this.textScore.setScrollFactor(0);
 
     this.textTime = this.add.text(10, 10, "Time: 00", {
@@ -308,8 +313,17 @@ class GameScene extends Phaser.Scene{
     this.emitter.start();
     this.target.setY(0);
     this.target.setX(this.getRandomX());
-    this.points++;
-    this.textScore.setText(`Score: ${this.points}`)
+
+    let points = this.registry.get("points");
+
+    // Increase score
+    points++;
+
+    // Save score globally
+    this.registry.set("points", points);
+
+    // Update displayed score
+    this.textScore.setText(`Score: ${points}`);
   }
 
   gameOver(){
@@ -361,5 +375,8 @@ gameStartBtn.addEventListener("click", ()=> {
 
   game.registry.set("gameStartTime", Date.now());
   game.registry.set("totalGameTime", 300000);
+
+  game.registry.set("points", 0);
+
   game.scene.resume("scene-game")
 })

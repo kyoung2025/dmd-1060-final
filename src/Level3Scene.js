@@ -25,7 +25,6 @@ export default class Level3Scene extends Phaser.Scene{
     // this.playerSpeed = speedDown + 50;
     this.playerSpeed = 352;
     this.target;
-    this.points = 0;
     this.textScore;
     this.textTime;
     this.remainingTime;
@@ -51,6 +50,9 @@ export default class Level3Scene extends Phaser.Scene{
   }
 
   create(){
+    // points
+    this.points = this.registry.get("points") || 0;
+
     this.isGameOver = false;
 
     this.popMusic = this.sound.add("pop")
@@ -174,10 +176,15 @@ export default class Level3Scene extends Phaser.Scene{
     });
     this.textScore.setScrollFactor(0);
 
-    this.textScore = this.add.text(sizes.width - 120, 10, "Score:0", {
-      font: "25px Arial",
-      fill: "#fff",
-    });
+    this.textScore = this.add.text(
+      sizes.width - 120,
+      10,
+      `Score: ${this.points}`,
+      {
+        font: "25px Arial",
+        fill: "#fff",
+      }
+    );
     this.textScore.setScrollFactor(0);
 
     this.textTime = this.add.text(10, 10, "Time: 00", {
@@ -294,7 +301,8 @@ export default class Level3Scene extends Phaser.Scene{
     this.target.setY(0);
     this.target.setX(this.getRandomX());
     this.points++;
-    this.textScore.setText(`Score: ${this.points}`)
+    this.registry.set("points", this.points);
+    this.textScore.setText(`Score: ${this.points}`);
   }
 
   gameOver(){
