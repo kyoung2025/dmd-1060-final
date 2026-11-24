@@ -1,5 +1,7 @@
 import './style.css'
 import Phaser from 'phaser'
+import Level2Scene from './Level2Scene.js'
+import Level3Scene from './Level3Scene.js'
 
 const sizes = {
   width: 850,
@@ -16,12 +18,14 @@ const gameEndDiv = document.querySelector("#gameEndDiv")
 const gameWinLoseSpan = document.querySelector("#gameWinLoseSpan")
 const gameEndScoreSpan = document.querySelector("#gameEndScoreSpan")
 
+let gameStartTime = null;
+const totalGameTime = 300000
+
 class GameScene extends Phaser.Scene{
   constructor(){
     super("scene-game");
     this.player;
     this.cursor;
-    // this.playerSpeed = speedDown + 50;
     this.playerSpeed = 352;
     this.target;
     this.points = 0;
@@ -51,6 +55,8 @@ class GameScene extends Phaser.Scene{
   }
 
   create(){
+    this.isGameOver = false;
+
     this.scene.pause("scene-game")
     this.popMusic = this.sound.add("pop")
     this.bgMusic = this.sound.add("bgMusic")
@@ -123,26 +129,20 @@ class GameScene extends Phaser.Scene{
     });
 
     this.player = this.physics.add
-        .sprite(100, groundY - 100, "sheet" )
+        .sprite(100, groundY - 170, "sheet" )
         .setOrigin(0, 0)
         .setScale(4);
 
     // Set idle animation
     this.player.setFrame(4)
     
-
-    /*this.player = this.physics.add
-        .image(100, groundY - 100, "sunny" )
-        .setOrigin(0, 0)
-        .setScale(0.5);*/
-  
-    // this.player.setImmovable(false);
-    // this.player.body.allowGravity = true;
     this.player.setGravityY(0);
 
-    this.player.setCollideWorldBounds(true);
+    // this.player.setCollideWorldBounds(true);
     this.player.setSize(this.player.width-this.player.width/1.5, this.player.height/2).
     setOffset(this.player.width/7, this.player.height - this.player.height/2);
+
+    // this.cameras.main.setViewport(0, 0, 850, 600);
 
     this.cameras.main.scrollX = 0;
     this.cameras.main.scrollY = groundY - sizes.height;
@@ -160,18 +160,7 @@ class GameScene extends Phaser.Scene{
 
     // -----------------  Sidescroller --------------
 
-    // TILED MAP
-    // this.physics.world.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
-    // this.cameras.main.setBounds(0, 0, map.widthInPixels * grassLayer.scaleX, map.heightInPixels * grassLayer.scaleY);
-    
-
-
     this.player.setCollideWorldBounds(true);
-    // Make the camera follow the player
-    // this.cameras.main.setBounds(0, 0, worldWidth, sizes.height);
-    // this.cameras.main.startFollow(this.player, true, 1, 1);
-
-
 
     this.target = this.physics.add
         .image(0, 0, "tomato")
@@ -186,19 +175,25 @@ class GameScene extends Phaser.Scene{
      // 7. Add a collider between the player and the walls layer
     this.physics.add.collider(this.player, grassLayer);
 
+    this.textScore = this.add.text(sizes.width - 250, 10, "Level 1", {
+      font: "25px Arial",
+      fill: "#fff",
+    });
+    this.textScore.setScrollFactor(0);
+
     this.textScore = this.add.text(sizes.width - 120, 10, "Score:0", {
       font: "25px Arial",
       fill: "#fff",
     });
     this.textScore.setScrollFactor(0);
 
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
+    this.textTime = this.add.text(10, 10, "Time: 00", {
       font: "25px Arial",
       fill: "#fff"
     });
     this.textTime.setScrollFactor(0);
 
-    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
+    // this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this)
 
     this.emitter = this.add.particles(-100, -50, "particles", {
       speed: 100,
@@ -209,17 +204,58 @@ class GameScene extends Phaser.Scene{
     })
     this.emitter.startFollow(this.player, this.player.width/ 2, this.player.height / 2, true);
 
+    // Create goal/portal to trigger level 2
+    const levelEndX = this.physics.world.bounds.width;
+
+    // 2. Place the goal near the right edge and above the ground floor
+    this.goal = this.physics.add.sprite(levelEndX - 100, this.worldFloorY - 100, 'tomato');
+    this.goal.setScale(0.5);
+    this.goal.setVisible(false);
+    this.goal.body.setAllowGravity(false);
+    this.goal.body.setImmovable(true);
+
+    // 3. Detect when player touches the goal
+    this.physics.add.overlap(this.player, this.goal, () => {
+      if (this.isGameOver) return;
+
+      this.scene.start('Level2Scene');
+    });
     
   }
 
   update(){
+    // Global Timer
+      if (this.isGameOver) return;
+
+      const gameStartTime = this.registry.get("gameStartTime");
+      const totalGameTime = this.registry.get("totalGameTime");
+
+      const elapsedTime = Date.now() - gameStartTime;
+
+      this.remainingTime = Math.max(
+        0,
+        (totalGameTime - elapsedTime) / 1000
+      );
+
+      this.textTime.setText(
+        `Time: ${Math.ceil(this.remainingTime)}`
+      );
+
+      if (this.remainingTime <= 0) {
+        this.gameOver();
+        return;
+      }
 
     // Keep camera vertically fixed at starting position
     this.cameras.main.scrollY = this.worldFloorY - sizes.height;
 
     this.background.tilePositionX = this.cameras.main.scrollX;
-    this.remainingTime = this.timedEvent.getRemainingSeconds()
-    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)
+
+    /*this.remainingTime = this.timedEvent.getRemainingSeconds()
+    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)*/
+
+
+
 
     if (this.target.y >= this.worldFloorY) {
       this.target.setY(0);
@@ -277,19 +313,29 @@ class GameScene extends Phaser.Scene{
   }
 
   gameOver(){
-    this.sys.game.destroy(true)
-    if(this.points >= 10){
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Win!"
+     if (this.isGameOver) return;
+
+    this.isGameOver = true;
+
+    // Stop gameplay without destroying Phaser
+    this.physics.pause();
+
+    this.player.setVelocity(0, 0);
+    this.player.anims.stop();
+
+    gameEndScoreSpan.textContent = this.points;
+
+    if (this.points >= 10) {
+      gameWinLoseSpan.textContent = "Win!";
     } else {
-      gameEndScoreSpan.textContent = this.points
-      gameWinLoseSpan.textContent = "Lose"
+      gameWinLoseSpan.textContent = "Lose";
     }
 
-    gameEndDiv.style.display = "flex"
+    gameEndDiv.style.display = "flex";
 
   }
 }
+
 
 const config = {
   type: Phaser.WEBGL,
@@ -305,12 +351,15 @@ const config = {
       // debug: true
     }
   },
-  scene: [GameScene]
+  scene: [GameScene, Level2Scene, Level3Scene]
 }
 
 const game = new Phaser.Game(config)
 
 gameStartBtn.addEventListener("click", ()=> {
   gameStartDiv.style.display = "none"
+
+  game.registry.set("gameStartTime", Date.now());
+  game.registry.set("totalGameTime", 300000);
   game.scene.resume("scene-game")
 })
