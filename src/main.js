@@ -184,7 +184,7 @@ class GameScene extends Phaser.Scene{
     this.textScore = this.add.text(
       sizes.width - 120,
       10,
-      `Score: ${this.points}`,
+      `Score: 0`,
       {
         font: "25px Arial",
         fill: "#fff",
