@@ -180,7 +180,7 @@ export default class Level3Scene extends Phaser.Scene{
     });
     this.textScore.setScrollFactor(0);
 
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
+    this.textTime = this.add.text(10, 10, "Time: 00", {
       font: "25px Arial",
       fill: "#fff"
     });
@@ -228,7 +228,7 @@ export default class Level3Scene extends Phaser.Scene{
     );
 
     this.textTime.setText(
-        `Remaining Time: ${Math.ceil(this.remainingTime)}`
+        `Time: ${Math.ceil(this.remainingTime)}`
     );
 
     if (this.remainingTime <= 0 && !this.isGameOver) {
