@@ -5,7 +5,7 @@ import Level3Scene from './Level3Scene.js'
 
 const sizes = {
   width: 850,
-  height: 570
+  height: 630
 }
 
 const speedDown = 300
@@ -33,9 +33,11 @@ class GameScene extends Phaser.Scene{
     this.timedEvent;
     this.remainingTime;
     this.popMusic;
-    this.jumpMusic;
+    this.fallMusic;
+    this.portalMusic;
     this.bgMusic;
     this.emitter;
+    this.isFalling = false;
   }
 
   preload(){
@@ -44,7 +46,8 @@ class GameScene extends Phaser.Scene{
     this.load.image("tomato", "/assets/tomato.png");
     this.load.image("particles", "/assets/particles.png");
     this.load.audio("pop", "/assets/pop.mp3");
-    this.load.audio("jump", "/assets/jump.mp3")
+    this.load.audio("fall", "/assets/fall-sfx.mp3")
+    this.load.audio("portal", "/assets/portal.mp3")
     this.load.audio("bgMusic", "/assets/bgMusic.mp3");
 
     this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
@@ -61,9 +64,10 @@ class GameScene extends Phaser.Scene{
 
     this.scene.pause("scene-game")
     this.popMusic = this.sound.add("pop")
-    this.jumpMusic = this.sound.add("jump")
+    this.fallMusic = this.sound.add("fall")
+    this.portalMusic = this.sound.add("portal")
     this.bgMusic = this.sound.add("bgMusic")
-    this.bgMusic.play()
+    // this.bgMusic.play()
     
     // TILED MAP
     const map = this.make.tilemap({ key: 'map' });
@@ -132,7 +136,7 @@ class GameScene extends Phaser.Scene{
     });
 
     this.player = this.physics.add
-        .sprite(100, groundY - 170, "sheet" )
+        .sprite(100, groundY - 281, "sheet" )
         .setOrigin(0, 0)
         .setScale(4);
 
@@ -144,8 +148,8 @@ class GameScene extends Phaser.Scene{
     // this.player.setCollideWorldBounds(true);
     this.player.setSize(this.player.width-this.player.width/1.5, this.player.height/2).
     setOffset(this.player.width/7, this.player.height - this.player.height/2);
-
-    // this.cameras.main.setViewport(0, 0, 850, 600);
+    
+    this.cameras.main.setViewport(0, 0, 850, 570);
 
     this.cameras.main.scrollX = 0;
     this.cameras.main.scrollY = groundY - sizes.height;
@@ -216,7 +220,7 @@ class GameScene extends Phaser.Scene{
     const levelEndX = this.physics.world.bounds.width;
 
     // 2. Place the goal near the right edge and above the ground floor
-    this.goal = this.physics.add.sprite(levelEndX - 100, this.worldFloorY - 100, 'tomato');
+    this.goal = this.physics.add.sprite(levelEndX - 10, this.worldFloorY - 210, 'tomato');
     this.goal.setScale(0.5);
     this.goal.setVisible(false);
     this.goal.body.setAllowGravity(false);
@@ -224,6 +228,7 @@ class GameScene extends Phaser.Scene{
 
     // 3. Detect when player touches the goal
     this.physics.add.overlap(this.player, this.goal, () => {
+      this.portalMusic.play()
       if (this.isGameOver) return;
 
       this.scene.start('Level2Scene');
@@ -261,9 +266,24 @@ class GameScene extends Phaser.Scene{
 
     /*this.remainingTime = this.timedEvent.getRemainingSeconds()
     this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`)*/
+    
+    // Check if player has fallen
+    if (this.player.body.bottom > this.worldFloorY - 1 && !this.isFalling) {
+      this.isFalling = true;
 
+      // Play sound immediately
+      this.fallMusic.play();
 
+      // Pause gameplay
+      this.physics.pause();
 
+      // Show game over after 1 second
+      this.time.delayedCall(1000, () => {
+        this.gameOver();
+      });
+
+      return;
+    }
 
     if (this.target.y >= this.worldFloorY) {
       this.target.setY(0);
