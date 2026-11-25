@@ -5,23 +5,31 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dmd-1060-final</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   </head>
   <body>
     <header>
-      <p>Princess Quest</p>
     </header>
     
     <main>
       <canvas id="gameCanvas"></canvas>
       <div id="gameStartDiv" class="gameUI">
-        <h1>Princess Quest</h1>
-        <p>Collect 10 tomatoes before the time runs out to win.</p>
-        <button id="gameStartBtn">Start</button>
+        <div class="start-text">
+          <h1 id="start-title">Princess Quest</h1>
+          <p id="start-instructions">Collect 10 tomatoes before the time runs out to win.</p>
+          <button id="gameStartBtn">Start</button>
+        </div>
       </div>
       <div id="gameEndDiv" class="gameUI">
-        <p>Game Over</p>
-        <h1>You <span id="gameWinLoseSpan"></span></h1>
-        <h1>Final Score: <span id="gameEndScoreSpan"></span></h1>
+        <div class="end-screen-top-text">
+          <p class="game-over-text">Game Over</p>
+        </div>
+        <div class="end-screen-middle-text">
+          <h1 class="win-lose-text">You <span id="gameWinLoseSpan"></span></h1>
+          <h1 class="final-score">Final Score: <span id="gameEndScoreSpan"></span></h1>
+        </div>
         <p>Refresh the page to play again</p>
       </div>
     </main>

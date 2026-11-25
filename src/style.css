@@ -1,8 +1,9 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --dkClr: #1d3836;
+  /* --dkClr: #162629; */
+  --dkClr: #3bd6f5;
   --liClr: whitesmoke;
-  --accClr: #0D0D35;
+  --accClr: #3bd6f5;
 }
 
 *{
@@ -36,6 +37,7 @@ main{
 }
 
 #gameCanvas{
+  border: 1px solid #fff;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -53,6 +55,8 @@ main{
   justify-content: center;
   align-items: center;
   z-index: 2;
+
+  font-family: "Press Start 2P";
 }
 
 .gameUI *{
@@ -61,11 +65,62 @@ main{
 }
 
 #gameStartDiv{
+  /* border: 2px solid tomato; */
+  background-image: url('/assets/cover-art-test.png');
+  background-repeat: no-repeat;
+  background-size: 900px;
+  image-rendering: pixelated;
+  background-position: 100% 20%; 
   display: flex;
+  align-items: flex-start;
+}
+
+.start-text{
+  /* border: 2px solid green; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* height: 100px; */
+  margin-left: 100px;
+}
+
+#start-title{
+  margin-bottom: 40px;
+  font-size: 50px;
+}
+
+#start-instructions{
+  margin-bottom: 10px;
 }
 
 #gameEndDiv{
   display: none;
+  font-family: "Press Start 2P";
+  gap: 1em;
+}
+
+.end-screen-top-text{
+  /* border: 2px solid tomato; */
+  margin-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 5em;
+}
+
+.end-screen-middle-text{
+  /* border: 2px solid tomato; */
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  margin-bottom: 100px;
+}
+
+.win-lose-text{
+  font-size: 50px;
+}
+
+.final-score{
+  font-size: 15px;
 }
 
 #gameStartBtn{

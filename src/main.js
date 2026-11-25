@@ -33,6 +33,7 @@ class GameScene extends Phaser.Scene{
     this.timedEvent;
     this.remainingTime;
     this.popMusic;
+    this.jumpMusic;
     this.bgMusic;
     this.emitter;
   }
@@ -43,6 +44,7 @@ class GameScene extends Phaser.Scene{
     this.load.image("tomato", "/assets/tomato.png");
     this.load.image("particles", "/assets/particles.png");
     this.load.audio("pop", "/assets/pop.mp3");
+    this.load.audio("jump", "/assets/jump.mp3")
     this.load.audio("bgMusic", "/assets/bgMusic.mp3");
 
     this.load.tilemapTiledJSON('map', 'assets/map3.tmj');
@@ -59,8 +61,9 @@ class GameScene extends Phaser.Scene{
 
     this.scene.pause("scene-game")
     this.popMusic = this.sound.add("pop")
+    this.jumpMusic = this.sound.add("jump")
     this.bgMusic = this.sound.add("bgMusic")
-    // this.bgMusic.play()
+    this.bgMusic.play()
     
     // TILED MAP
     const map = this.make.tilemap({ key: 'map' });
