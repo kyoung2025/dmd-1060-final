@@ -75,6 +75,8 @@ main{
   background-position: 100% 20%; 
   display: flex;
   align-items: flex-start;
+  border: 1px solid #fff;
+  margin: 0 40px;
 }
 
 .start-text{
@@ -99,6 +101,8 @@ main{
   display: none;
   font-family: "Press Start 2P";
   gap: 1em;
+  border: 1px solid #fff;
+  margin: 0 40px;
 }
 
 .end-screen-top-text{
