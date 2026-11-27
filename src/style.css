@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   /* --dkClr: #162629; */
-  --dkClr: #1f3439;
+  --dkClr: #3bd6f5;
   --liClr: whitesmoke;
   --accClr: #3bd6f5;
 }
@@ -68,14 +68,14 @@ main{
 
 #gameStartDiv{
   /* border: 2px solid tomato; */
-  background-image: url('/assets/cover-art-test.png');
+  background-image: url('/assets/cover-art1.png');
   background-repeat: no-repeat;
   background-size: 900px;
   image-rendering: pixelated;
   background-position: 100% 20%; 
   display: flex;
   align-items: flex-start;
-  border: 1px solid #fff;
+  border: 2px solid #fff;
   margin: 0 40px;
 }
 
@@ -101,7 +101,7 @@ main{
   display: none;
   font-family: "Press Start 2P";
   gap: 1em;
-  border: 1px solid #fff;
+  border: 2px solid #fff;
   margin: 0 40px;
 }
 

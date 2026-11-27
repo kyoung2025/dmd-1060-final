@@ -350,26 +350,30 @@ class GameScene extends Phaser.Scene{
   }
 
   gameOver(){
-     if (this.isGameOver) return;
+    if (this.isGameOver) return;
 
     this.isGameOver = true;
 
-    // Stop gameplay without destroying Phaser
+    // Stop gameplay
     this.physics.pause();
 
     this.player.setVelocity(0, 0);
     this.player.anims.stop();
 
-    gameEndScoreSpan.textContent = this.points;
+    // Get the current score from the Phaser registry
+    const points = this.registry.get("points") || 0;
 
-    if (this.points >= 10) {
+    // Display final score
+    gameEndScoreSpan.textContent = points;
+
+    // Check whether player won or lost
+    if (points >= 10) {
       gameWinLoseSpan.textContent = "Win!";
     } else {
       gameWinLoseSpan.textContent = "Lose";
     }
 
     gameEndDiv.style.display = "flex";
-
   }
 }
 
